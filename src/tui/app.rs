@@ -32,6 +32,8 @@ pub struct App {
     pub sort_direction: SortDirection,
     pub group_mode: bool,
     pub inspect_mode: bool,
+    pub auto_refresh: bool,
+    pub auto_refresh_interval_ms: u64,
     pub selected_ports: BTreeSet<usize>,
     clipboard: Option<ClipboardContext>,
 }
@@ -60,6 +62,8 @@ impl App {
             sort_direction: SortDirection::Asc,
             group_mode: false,
             inspect_mode: false,
+            auto_refresh: false,
+            auto_refresh_interval_ms: 1_000,
             selected_ports: BTreeSet::new(),
             clipboard,
         })
@@ -119,6 +123,31 @@ impl App {
         };
         let _ = self.refresh();
         self.message = Some(format!("Sort direction: {:?}", self.sort_direction));
+    }
+
+    pub fn toggle_auto_refresh(&mut self) {
+        self.auto_refresh = !self.auto_refresh;
+        self.message = Some(format!(
+            "Auto-refresh: {} ({:.1}s)",
+            if self.auto_refresh { "ON" } else { "OFF" },
+            self.auto_refresh_interval_ms as f64 / 1000.0
+        ));
+    }
+
+    pub fn increase_refresh_interval(&mut self) {
+        self.auto_refresh_interval_ms = (self.auto_refresh_interval_ms + 500).min(10_000);
+        self.message = Some(format!(
+            "Auto-refresh interval: {:.1}s",
+            self.auto_refresh_interval_ms as f64 / 1000.0
+        ));
+    }
+
+    pub fn decrease_refresh_interval(&mut self) {
+        self.auto_refresh_interval_ms = self.auto_refresh_interval_ms.saturating_sub(500).max(500);
+        self.message = Some(format!(
+            "Auto-refresh interval: {:.1}s",
+            self.auto_refresh_interval_ms as f64 / 1000.0
+        ));
     }
 
     pub fn begin_filter(&mut self) {

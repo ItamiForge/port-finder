@@ -60,6 +60,8 @@ pf scan 3000-4000
 
 - `q` / `Esc`: quit
 - `r`: refresh
+- `t`: toggle auto-refresh
+- `+` / `-`: increase/decrease auto-refresh interval
 - `↑` / `↓` or `j` / `k`: navigate
 - `PgUp` / `PgDn`: page navigation
 - `Home` / `End`: jump to first/last row

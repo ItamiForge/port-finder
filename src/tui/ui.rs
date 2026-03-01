@@ -185,13 +185,15 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 
     let header_text = format!(
-        " Port Finder  •  Visible: {}  •  Total: {}  •  Selected: {}  •  Mode: {}  •  Sort: {:?} ({:?}) ",
+        " Port Finder  •  Visible: {}  •  Total: {}  •  Selected: {}  •  Mode: {}  •  Sort: {:?} ({:?})  •  Auto: {} ({:.1}s) ",
         rows.len(),
         app.ports.len(),
         app.selected_ports.len(),
         if app.show_all { "ALL" } else { "LISTEN" },
         app.sort_column,
-        app.sort_direction
+        app.sort_direction,
+        if app.auto_refresh { "ON" } else { "OFF" },
+        app.auto_refresh_interval_ms as f64 / 1000.0
     );
     let header = Paragraph::new(header_text)
         .style(Style::default().fg(Color::Cyan))
@@ -242,7 +244,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     };
     let msg = app.message.as_deref().unwrap_or("");
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
         mode_indicator, group_indicator, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))

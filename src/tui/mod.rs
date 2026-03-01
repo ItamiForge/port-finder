@@ -35,8 +35,16 @@ pub fn run() -> Result<()> {
 
 fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
     const PAGE_STEP: usize = 10;
+    let mut last_refresh = std::time::Instant::now();
 
     loop {
+        if app.auto_refresh
+            && last_refresh.elapsed() >= Duration::from_millis(app.auto_refresh_interval_ms)
+        {
+            app.refresh()?;
+            last_refresh = std::time::Instant::now();
+        }
+
         terminal.draw(|f| ui::draw(f, app))?;
 
         if event::poll(Duration::from_millis(250))? {
@@ -58,7 +66,10 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                     } else {
                         match key.code {
                             KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
-                            KeyCode::Char('r') => app.refresh()?,
+                            KeyCode::Char('r') => {
+                                app.refresh()?;
+                                last_refresh = std::time::Instant::now();
+                            }
                             KeyCode::Up => app.prev(),
                             KeyCode::Down => app.next(),
                             KeyCode::Char('k') => app.prev(),
@@ -75,6 +86,14 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('/') => app.begin_filter(),
                             KeyCode::Char('s') => app.cycle_sort(),
                             KeyCode::Char('d') => app.toggle_sort_direction(),
+                            KeyCode::Char('t') => {
+                                app.toggle_auto_refresh();
+                                last_refresh = std::time::Instant::now();
+                            }
+                            KeyCode::Char('+') | KeyCode::Char('=') => {
+                                app.increase_refresh_interval()
+                            }
+                            KeyCode::Char('-') => app.decrease_refresh_interval(),
                             KeyCode::Char('g') => app.toggle_group(),
                             KeyCode::Enter => app.toggle_inspect(),
                             KeyCode::Char('c') => app.copy_selected(),
