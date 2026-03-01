@@ -102,22 +102,52 @@ impl App {
     }
 
     pub fn refresh(&mut self) -> Result<()> {
+        let selected_identity = self.selected_port().map(Self::port_identity);
+        let selected_identities: BTreeSet<(u16, Option<u32>, String)> = self
+            .selected_ports
+            .iter()
+            .filter_map(|index| self.ports.get(*index).map(Self::port_identity))
+            .collect();
+
         let mut ports = port::list_ports(self.show_all)?;
         self.sort_ports(&mut ports);
         self.ports = ports;
         self.visible_indices = (0..self.ports.len()).collect();
-        self.selected_ports.clear();
+
+        self.selected_ports = self
+            .ports
+            .iter()
+            .enumerate()
+            .filter_map(|(index, port)| {
+                if selected_identities.contains(&Self::port_identity(port)) {
+                    Some(index)
+                } else {
+                    None
+                }
+            })
+            .collect();
 
         if self.visible_indices.is_empty() {
             self.state.select(None);
+        } else if let Some(identity) = selected_identity {
+            let selected = self
+                .ports
+                .iter()
+                .position(|port| Self::port_identity(port) == identity)
+                .unwrap_or(0);
+            self.state
+                .select(Some(selected.min(self.visible_indices.len() - 1)));
         } else if let Some(selected) = self.state.selected() {
-            if selected >= self.visible_indices.len() {
-                self.state.select(Some(self.visible_indices.len() - 1));
-            }
+            self.state
+                .select(Some(selected.min(self.visible_indices.len() - 1)));
         } else {
             self.state.select(Some(0));
         }
         Ok(())
+    }
+
+    fn port_identity(port: &PortInfo) -> (u16, Option<u32>, String) {
+        (port.port, port.pid, port.local_addr.clone())
     }
 
     fn sort_ports(&self, ports: &mut [PortInfo]) {
