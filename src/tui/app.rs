@@ -34,6 +34,18 @@ pub enum StateFilter {
     Established,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum PendingKill {
+    Single {
+        pid: u32,
+        port: u16,
+        process_name: String,
+    },
+    Batch {
+        pids: Vec<u32>,
+    },
+}
+
 pub struct App {
     pub ports: Vec<PortInfo>,
     pub visible_indices: Vec<usize>,
@@ -51,6 +63,7 @@ pub struct App {
     pub auto_refresh: bool,
     pub auto_refresh_interval_ms: u64,
     pub selected_ports: BTreeSet<usize>,
+    pub pending_kill: Option<PendingKill>,
     clipboard: Option<ClipboardContext>,
 }
 
@@ -83,6 +96,7 @@ impl App {
             auto_refresh: false,
             auto_refresh_interval_ms: 1_000,
             selected_ports: BTreeSet::new(),
+            pending_kill: None,
             clipboard,
         })
     }
@@ -331,23 +345,6 @@ impl App {
         let _ = self.refresh();
     }
 
-    pub fn kill_selected(&mut self) -> Result<()> {
-        let Some(info) = self.selected_port().cloned() else {
-            return Ok(());
-        };
-
-        if let Some(pid) = info.pid {
-            let mut sys = System::new_all();
-            sys.refresh_all();
-            if let Some(process) = sys.process(Pid::from_u32(pid)) {
-                process.kill();
-                self.message = Some(format!("Killed PID {}", pid));
-                self.refresh()?;
-            }
-        }
-        Ok(())
-    }
-
     pub fn toggle_select_selected(&mut self) {
         let Some(index) = self.selected_port_index() else {
             return;
@@ -362,15 +359,56 @@ impl App {
         self.message = Some(format!("Selected {} row(s)", self.selected_ports.len()));
     }
 
+    pub fn has_pending_kill(&self) -> bool {
+        self.pending_kill.is_some()
+    }
+
+    pub fn pending_kill_prompt(&self) -> Option<String> {
+        match &self.pending_kill {
+            Some(PendingKill::Single {
+                pid,
+                port,
+                process_name,
+            }) => Some(format!(
+                "Kill PID {} ({}) on port {}? [y/Enter=yes, n/Esc=no]",
+                pid, process_name, port
+            )),
+            Some(PendingKill::Batch { pids }) => Some(format!(
+                "Kill {} selected process(es)? [y/Enter=yes, n/Esc=no]",
+                pids.len()
+            )),
+            None => None,
+        }
+    }
+
     pub fn clear_selection(&mut self) {
         self.selected_ports.clear();
         self.message = Some("Selection cleared".to_string());
     }
 
-    pub fn kill_selected_batch(&mut self) -> Result<()> {
+    pub fn request_kill_selected(&mut self) {
+        let Some(info) = self.selected_port().cloned() else {
+            self.message = Some("No selected row".to_string());
+            return;
+        };
+
+        let Some(pid) = info.pid else {
+            self.message = Some("Selected row has no killable PID".to_string());
+            return;
+        };
+
+        self.pending_kill = Some(PendingKill::Single {
+            pid,
+            port: info.port,
+            process_name: info.process_name,
+        });
+        self.message = Some("Kill pending confirmation".to_string());
+    }
+
+    pub fn request_kill_selected_batch(&mut self) {
         if self.selected_ports.is_empty() {
             self.message = Some("No selected rows".to_string());
-            return Ok(());
+            return;
         }
 
         let mut pids_to_kill = BTreeSet::new();
@@ -384,23 +422,65 @@ impl App {
 
         if pids_to_kill.is_empty() {
             self.message = Some("No killable PID in selected rows".to_string());
-            return Ok(());
+            return;
         }
 
+        self.pending_kill = Some(PendingKill::Batch {
+            pids: pids_to_kill.into_iter().collect(),
+        });
+        self.message = Some("Batch kill pending confirmation".to_string());
+    }
+
+    pub fn confirm_pending_kill(&mut self) -> Result<()> {
+        let Some(pending_kill) = self.pending_kill.take() else {
+            return Ok(());
+        };
+
+        match pending_kill {
+            PendingKill::Single {
+                pid,
+                port: _,
+                process_name: _,
+            } => {
+                let killed = self.kill_pids([pid]);
+                self.message = if killed == 1 {
+                    Some(format!("Killed PID {}", pid))
+                } else {
+                    Some(format!("PID {} was not running", pid))
+                };
+            }
+            PendingKill::Batch { pids } => {
+                let requested = pids.len();
+                let killed = self.kill_pids(pids);
+                self.message = Some(format!(
+                    "Batch kill complete: {}/{} process(es)",
+                    killed, requested
+                ));
+            }
+        }
+
+        self.refresh()?;
+        Ok(())
+    }
+
+    pub fn cancel_pending_kill(&mut self) {
+        if self.pending_kill.take().is_some() {
+            self.message = Some("Kill canceled".to_string());
+        }
+    }
+
+    fn kill_pids(&self, pids: impl IntoIterator<Item = u32>) -> usize {
         let mut sys = System::new_all();
         sys.refresh_all();
 
         let mut killed = 0usize;
-        for pid in pids_to_kill {
+        for pid in pids {
             if let Some(process) = sys.process(Pid::from_u32(pid)) {
                 process.kill();
                 killed += 1;
             }
         }
-
-        self.message = Some(format!("Batch kill complete: {} process(es)", killed));
-        self.refresh()?;
-        Ok(())
+        killed
     }
 
     pub fn selected_port_index(&self) -> Option<usize> {

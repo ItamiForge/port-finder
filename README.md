@@ -68,8 +68,10 @@ pf scan 3000-4000
 - `Enter`: inspect selected process
 - `Space`: toggle row selection
 - `x`: clear selected rows
-- `K`: kill selected process
-- `B`: batch kill selected rows
+- `K`: stage kill for selected process (requires confirmation)
+- `B`: stage batch kill for selected rows (requires confirmation)
+- `y` / `Enter`: confirm pending kill
+- `n` / `Esc`: cancel pending kill
 - `a`: toggle all/listening view
 - `g`: toggle grouped view
 - `s`: cycle sort column

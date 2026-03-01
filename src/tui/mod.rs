@@ -55,6 +55,12 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Esc | KeyCode::Enter => app.toggle_inspect(),
                             _ => {}
                         }
+                    } else if app.has_pending_kill() {
+                        match key.code {
+                            KeyCode::Char('y') | KeyCode::Enter => app.confirm_pending_kill()?,
+                            KeyCode::Char('n') | KeyCode::Esc => app.cancel_pending_kill(),
+                            _ => {}
+                        }
                     } else if app.filter_mode {
                         match key.code {
                             KeyCode::Esc => app.cancel_filter(),
@@ -78,8 +84,8 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::End => app.last(),
                             KeyCode::PageUp => app.page_up(PAGE_STEP),
                             KeyCode::PageDown => app.page_down(PAGE_STEP),
-                            KeyCode::Char('K') => app.kill_selected()?,
-                            KeyCode::Char('B') => app.kill_selected_batch()?,
+                            KeyCode::Char('K') => app.request_kill_selected(),
+                            KeyCode::Char('B') => app.request_kill_selected_batch(),
                             KeyCode::Char(' ') => app.toggle_select_selected(),
                             KeyCode::Char('x') => app.clear_selection(),
                             KeyCode::Char('a') => app.toggle_all(),

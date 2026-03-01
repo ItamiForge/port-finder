@@ -251,9 +251,14 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         format!("FILTER: {}", app.filter_text)
     };
     let msg = app.message.as_deref().unwrap_or("");
+    let kill_hint = if app.has_pending_kill() {
+        " [y/Enter]confirm [n/Esc]cancel"
+    } else {
+        ""
+    };
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
-        mode_indicator, group_indicator, filter_indicator, msg
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy{}  {}  {}",
+        mode_indicator, group_indicator, kill_hint, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
     .block(Block::default().borders(Borders::ALL));
@@ -262,6 +267,10 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 
     if app.inspect_mode {
         render_inspect_popup(frame, app);
+    }
+
+    if app.has_pending_kill() {
+        render_confirm_popup(frame, app);
     }
 }
 
@@ -349,6 +358,31 @@ fn render_inspect_popup(frame: &mut Frame, app: &App) {
         frame.render_widget(Clear, area);
         frame.render_widget(paragraph, area);
     }
+}
+
+fn render_confirm_popup(frame: &mut Frame, app: &App) {
+    let Some(prompt) = app.pending_kill_prompt() else {
+        return;
+    };
+
+    let area = centered_rect(52, 24, frame.area());
+    let text = vec![
+        Line::from(Span::styled(
+            "Confirm Kill",
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(prompt),
+    ];
+
+    let paragraph = Paragraph::new(text)
+        .block(Block::default().borders(Borders::ALL).title(" Confirm "))
+        .wrap(Wrap { trim: true });
+
+    frame.render_widget(Clear, area);
+    frame.render_widget(paragraph, area);
 }
 
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
