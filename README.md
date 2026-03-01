@@ -74,6 +74,8 @@ pf scan 3000-4000
 - `g`: toggle grouped view
 - `s`: cycle sort column
 - `d`: toggle sort direction
+- `p`: cycle protocol filter (All/TCP/UDP)
+- `w`: cycle state filter (All/Listen/Established)
 - `/`: enter filter mode (type to filter, `Enter` apply, `Esc` clear)
 - `c`: copy selected local address
 

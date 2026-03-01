@@ -20,6 +20,20 @@ pub enum SortDirection {
     Desc,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ProtocolFilter {
+    All,
+    Tcp,
+    Udp,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum StateFilter {
+    All,
+    Listen,
+    Established,
+}
+
 pub struct App {
     pub ports: Vec<PortInfo>,
     pub visible_indices: Vec<usize>,
@@ -30,6 +44,8 @@ pub struct App {
     pub message: Option<String>,
     pub sort_column: SortColumn,
     pub sort_direction: SortDirection,
+    pub protocol_filter: ProtocolFilter,
+    pub state_filter: StateFilter,
     pub group_mode: bool,
     pub inspect_mode: bool,
     pub auto_refresh: bool,
@@ -60,6 +76,8 @@ impl App {
             message: None,
             sort_column: SortColumn::Port,
             sort_direction: SortDirection::Asc,
+            protocol_filter: ProtocolFilter::All,
+            state_filter: StateFilter::All,
             group_mode: false,
             inspect_mode: false,
             auto_refresh: false,
@@ -123,6 +141,40 @@ impl App {
         };
         let _ = self.refresh();
         self.message = Some(format!("Sort direction: {:?}", self.sort_direction));
+    }
+
+    pub fn cycle_protocol_filter(&mut self) {
+        self.protocol_filter = match self.protocol_filter {
+            ProtocolFilter::All => ProtocolFilter::Tcp,
+            ProtocolFilter::Tcp => ProtocolFilter::Udp,
+            ProtocolFilter::Udp => ProtocolFilter::All,
+        };
+        self.message = Some(format!("Protocol filter: {:?}", self.protocol_filter));
+    }
+
+    pub fn cycle_state_filter(&mut self) {
+        self.state_filter = match self.state_filter {
+            StateFilter::All => StateFilter::Listen,
+            StateFilter::Listen => StateFilter::Established,
+            StateFilter::Established => StateFilter::All,
+        };
+        self.message = Some(format!("State filter: {:?}", self.state_filter));
+    }
+
+    pub fn matches_quick_filters(&self, port: &PortInfo) -> bool {
+        let protocol_match = match self.protocol_filter {
+            ProtocolFilter::All => true,
+            ProtocolFilter::Tcp => port.protocol.eq_ignore_ascii_case("tcp"),
+            ProtocolFilter::Udp => port.protocol.eq_ignore_ascii_case("udp"),
+        };
+
+        let state_match = match self.state_filter {
+            StateFilter::All => true,
+            StateFilter::Listen => port.state.eq_ignore_ascii_case("listen"),
+            StateFilter::Established => port.state.eq_ignore_ascii_case("established"),
+        };
+
+        protocol_match && state_match
     }
 
     pub fn toggle_auto_refresh(&mut self) {

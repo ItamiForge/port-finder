@@ -21,17 +21,23 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 
     let filtered_ports: Vec<(usize, &crate::port::PortInfo)> = if app.filter_text.is_empty() {
-        app.ports.iter().enumerate().collect()
+        app.ports
+            .iter()
+            .enumerate()
+            .filter(|(_, port)| app.matches_quick_filters(port))
+            .collect()
     } else {
         app.ports
             .iter()
             .enumerate()
             .filter(|p| {
-                p.1.port.to_string().contains(&app.filter_text)
-                    || p.1
-                        .process_name
-                        .to_lowercase()
-                        .contains(&app.filter_text.to_lowercase())
+                app.matches_quick_filters(p.1)
+                    && (app.filter_text.is_empty()
+                        || p.1.port.to_string().contains(&app.filter_text)
+                        || p.1
+                            .process_name
+                            .to_lowercase()
+                            .contains(&app.filter_text.to_lowercase()))
             })
             .collect()
     };
@@ -185,13 +191,15 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 
     let header_text = format!(
-        " Port Finder  •  Visible: {}  •  Total: {}  •  Selected: {}  •  Mode: {}  •  Sort: {:?} ({:?})  •  Auto: {} ({:.1}s) ",
+        " Port Finder  •  Visible: {}  •  Total: {}  •  Selected: {}  •  Mode: {}  •  Sort: {:?} ({:?})  •  Proto: {:?}  •  State: {:?}  •  Auto: {} ({:.1}s) ",
         rows.len(),
         app.ports.len(),
         app.selected_ports.len(),
         if app.show_all { "ALL" } else { "LISTEN" },
         app.sort_column,
         app.sort_direction,
+        app.protocol_filter,
+        app.state_filter,
         if app.auto_refresh { "ON" } else { "OFF" },
         app.auto_refresh_interval_ms as f64 / 1000.0
     );
@@ -244,7 +252,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     };
     let msg = app.message.as_deref().unwrap_or("");
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
         mode_indicator, group_indicator, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
