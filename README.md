@@ -80,6 +80,7 @@ pf scan 3000-4000
 - `p`: cycle protocol filter (All/TCP/UDP)
 - `w`: cycle state filter (All/Listen/Established)
 - `/`: enter filter mode (type to filter, `Enter` apply, `Esc` clear)
+- `z`: reset text/protocol/state filters
 - `c`: copy selected local address
 
 ## Build and quality checks

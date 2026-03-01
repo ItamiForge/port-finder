@@ -240,6 +240,14 @@ impl App {
         self.message = Some("Filter cleared".to_string());
     }
 
+    pub fn reset_all_filters(&mut self) {
+        self.filter_mode = false;
+        self.filter_text.clear();
+        self.protocol_filter = ProtocolFilter::All;
+        self.state_filter = StateFilter::All;
+        self.message = Some("All filters reset".to_string());
+    }
+
     pub fn toggle_group(&mut self) {
         self.group_mode = !self.group_mode;
         self.state.select(Some(0));

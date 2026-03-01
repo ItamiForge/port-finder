@@ -95,6 +95,7 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('d') => app.toggle_sort_direction(),
                             KeyCode::Char('p') => app.cycle_protocol_filter(),
                             KeyCode::Char('w') => app.cycle_state_filter(),
+                            KeyCode::Char('z') => app.reset_all_filters(),
                             KeyCode::Char('t') => {
                                 app.toggle_auto_refresh();
                                 last_refresh = std::time::Instant::now();
