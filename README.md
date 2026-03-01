@@ -69,6 +69,7 @@ pf scan 3000-4000
 - `Enter`: inspect selected process
 - `Space`: toggle row selection
 - `v`: toggle selection for all visible rows
+- `i`: invert selection for visible rows
 - `u`: toggle selection for all rows with selected PID
 - `x`: clear selected rows
 - `K`: stage kill for selected process (requires confirmation)

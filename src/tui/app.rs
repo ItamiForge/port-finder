@@ -454,6 +454,26 @@ impl App {
         }
     }
 
+    pub fn invert_select_visible(&mut self) {
+        if self.visible_indices.is_empty() {
+            self.message = Some("No visible rows".to_string());
+            return;
+        }
+
+        for index in &self.visible_indices {
+            if self.selected_ports.contains(index) {
+                self.selected_ports.remove(index);
+            } else {
+                self.selected_ports.insert(*index);
+            }
+        }
+
+        self.message = Some(format!(
+            "Visible selection inverted ({} total selected)",
+            self.selected_ports.len()
+        ));
+    }
+
     pub fn toggle_select_same_pid(&mut self) {
         let Some(selected) = self.selected_port() else {
             self.message = Some("No selected row".to_string());

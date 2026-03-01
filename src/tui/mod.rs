@@ -88,6 +88,7 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('B') => app.request_kill_selected_batch(),
                             KeyCode::Char(' ') => app.toggle_select_selected(),
                             KeyCode::Char('v') => app.toggle_select_visible(),
+                            KeyCode::Char('i') => app.invert_select_visible(),
                             KeyCode::Char('u') => app.toggle_select_same_pid(),
                             KeyCode::Char('x') => app.clear_selection(),
                             KeyCode::Char('a') => app.toggle_all(),
