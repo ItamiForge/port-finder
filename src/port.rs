@@ -254,8 +254,15 @@ pub fn kill_port(port: u16, force: bool) -> Result<()> {
     sys.refresh_all();
 
     if let Some(process) = sys.process(Pid::from_u32(pid)) {
-        process.kill();
-        println!("{} Killed {} (PID {})", "✓".green(), info.process_name, pid);
+        if process.kill() {
+            println!("{} Killed {} (PID {})", "✓".green(), info.process_name, pid);
+        } else {
+            return Err(anyhow!(
+                "Failed to kill PID {} ({}). Try elevated privileges.",
+                pid,
+                info.process_name
+            ));
+        }
     } else {
         return Err(anyhow!("Process {} not found", pid));
     }

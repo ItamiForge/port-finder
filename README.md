@@ -15,6 +15,7 @@ When local development breaks because a port is already in use, `port-finder` gi
 - Scan ranges for available/in-use ports
 - Interactive TUI mode (`pf`)
 - Selection persistence across refresh and auto-refresh
+- Clear kill feedback (killed, missing, permission/protected failures)
 - Works on macOS, Linux, and Windows
 
 ## Install

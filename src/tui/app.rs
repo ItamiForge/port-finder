@@ -653,20 +653,35 @@ impl App {
                 port: _,
                 process_name: _,
             } => {
-                let killed = self.kill_pids([pid]);
+                let (killed, failed_signal, missing) = self.kill_pids([pid]);
                 self.message = if killed == 1 {
                     Some(format!("Killed PID {}", pid))
-                } else {
+                } else if failed_signal == 1 {
+                    Some(format!(
+                        "Failed to kill PID {} (permission denied or protected)",
+                        pid
+                    ))
+                } else if missing == 1 {
                     Some(format!("PID {} was not running", pid))
+                } else {
+                    Some(format!("Kill failed for PID {}", pid))
                 };
             }
             PendingKill::Batch { pids } => {
                 let requested = pids.len();
-                let killed = self.kill_pids(pids);
-                self.message = Some(format!(
-                    "Batch kill complete: {}/{} process(es)",
-                    killed, requested
-                ));
+                let (killed, failed_signal, missing) = self.kill_pids(pids);
+
+                if failed_signal > 0 {
+                    self.message = Some(format!(
+                        "Batch kill: {}/{} killed, {} failed, {} missing (try elevated privileges)",
+                        killed, requested, failed_signal, missing
+                    ));
+                } else {
+                    self.message = Some(format!(
+                        "Batch kill: {}/{} killed, {} missing",
+                        killed, requested, missing
+                    ));
+                }
             }
         }
 
@@ -680,18 +695,25 @@ impl App {
         }
     }
 
-    fn kill_pids(&self, pids: impl IntoIterator<Item = u32>) -> usize {
+    fn kill_pids(&self, pids: impl IntoIterator<Item = u32>) -> (usize, usize, usize) {
         let mut sys = System::new_all();
         sys.refresh_all();
 
         let mut killed = 0usize;
+        let mut failed_signal = 0usize;
+        let mut missing = 0usize;
         for pid in pids {
             if let Some(process) = sys.process(Pid::from_u32(pid)) {
-                process.kill();
-                killed += 1;
+                if process.kill() {
+                    killed += 1;
+                } else {
+                    failed_signal += 1;
+                }
+            } else {
+                missing += 1;
             }
         }
-        killed
+        (killed, failed_signal, missing)
     }
 
     pub fn selected_port_index(&self) -> Option<usize> {
