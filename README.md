@@ -43,19 +43,28 @@ pf --version
 pf
 pf list
 pf find 3000
+pf find 3000 --json
 pf kill 3000
-pf check 8080
+pf check 8080 --json
 pf scan 3000-4000
 ```
 
 ## Command reference
 
 - `pf`: launch interactive TUI
-- `pf list [--all]`: list active ports (`--all` includes non-listen states)
-- `pf find <port>`: show process details for one port
+- `pf list [--all] [--json]`: list active ports (`--all` includes non-listen states)
+- `pf find <port> [--json]`: show process details for one port
 - `pf kill <port> [--force]`: terminate process on a port
-- `pf check <port>`: return availability status
+- `pf check <port> [--json]`: return availability status
 - `pf scan <start-end>`: scan a range like `3000-4000`
+
+### JSON output
+
+Use `--json` on `list`, `find`, and `check` for machine-readable output.
+
+- `pf list --json`: JSON array of port entries
+- `pf find 3000 --json`: object with `in_use` and `entry`
+- `pf check 8080 --json`: object with `available` and `in_use`
 
 ## TUI controls
 

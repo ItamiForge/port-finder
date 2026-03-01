@@ -15,11 +15,17 @@ pub enum Command {
         /// Show all connections, not just listening
         #[arg(short, long)]
         all: bool,
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Find process using a port
     Find {
         /// Port number
         port: u16,
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Kill process on a port
     Kill {
@@ -33,6 +39,9 @@ pub enum Command {
     Check {
         /// Port number
         port: u16,
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
     },
     /// Scan port range for availability
     Scan {
