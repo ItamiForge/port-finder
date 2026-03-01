@@ -64,6 +64,7 @@ pf scan 3000-4000
 - `t`: toggle auto-refresh
 - `+` / `-`: increase/decrease auto-refresh interval
 - `↑` / `↓` or `j` / `k`: navigate
+- `n` / `N`: jump to next/previous selected row
 - `PgUp` / `PgDn`: page navigation
 - `Home` / `End`: jump to first/last row
 - `Enter`: inspect selected process

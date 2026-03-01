@@ -85,6 +85,8 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Down => app.next(),
                             KeyCode::Char('k') => app.prev(),
                             KeyCode::Char('j') => app.next(),
+                            KeyCode::Char('n') => app.next_selected_row(),
+                            KeyCode::Char('N') => app.prev_selected_row(),
                             KeyCode::Home => app.first(),
                             KeyCode::End => app.last(),
                             KeyCode::PageUp => app.page_up(PAGE_STEP),

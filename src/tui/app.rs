@@ -384,6 +384,71 @@ impl App {
         self.state.select(Some(target));
     }
 
+    pub fn next_selected_row(&mut self) {
+        if self.visible_indices.is_empty() {
+            return;
+        }
+
+        let selected_visible: Vec<usize> = self
+            .visible_indices
+            .iter()
+            .enumerate()
+            .filter_map(|(visible_index, port_index)| {
+                self.selected_ports
+                    .contains(port_index)
+                    .then_some(visible_index)
+            })
+            .collect();
+
+        if selected_visible.is_empty() {
+            self.message = Some("No selected rows to jump to".to_string());
+            return;
+        }
+
+        let current = self.state.selected().unwrap_or(0);
+        let target = selected_visible
+            .iter()
+            .copied()
+            .find(|index| *index > current)
+            .unwrap_or(selected_visible[0]);
+
+        self.state.select(Some(target));
+        self.message = Some("Jumped to next selected row".to_string());
+    }
+
+    pub fn prev_selected_row(&mut self) {
+        if self.visible_indices.is_empty() {
+            return;
+        }
+
+        let selected_visible: Vec<usize> = self
+            .visible_indices
+            .iter()
+            .enumerate()
+            .filter_map(|(visible_index, port_index)| {
+                self.selected_ports
+                    .contains(port_index)
+                    .then_some(visible_index)
+            })
+            .collect();
+
+        if selected_visible.is_empty() {
+            self.message = Some("No selected rows to jump to".to_string());
+            return;
+        }
+
+        let current = self.state.selected().unwrap_or(0);
+        let target = selected_visible
+            .iter()
+            .rev()
+            .copied()
+            .find(|index| *index < current)
+            .unwrap_or(*selected_visible.last().unwrap_or(&selected_visible[0]));
+
+        self.state.select(Some(target));
+        self.message = Some("Jumped to previous selected row".to_string());
+    }
+
     pub fn toggle_all(&mut self) {
         self.show_all = !self.show_all;
         let _ = self.refresh();
