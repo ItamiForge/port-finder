@@ -67,6 +67,7 @@ pf scan 3000-4000
 - `Home` / `End`: jump to first/last row
 - `Enter`: inspect selected process
 - `Space`: toggle row selection
+- `v`: toggle selection for all visible rows
 - `x`: clear selected rows
 - `K`: stage kill for selected process (requires confirmation)
 - `B`: stage batch kill for selected rows (requires confirmation)

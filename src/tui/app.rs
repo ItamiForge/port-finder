@@ -386,6 +386,36 @@ impl App {
         self.message = Some("Selection cleared".to_string());
     }
 
+    pub fn toggle_select_visible(&mut self) {
+        if self.visible_indices.is_empty() {
+            self.message = Some("No visible rows".to_string());
+            return;
+        }
+
+        let all_visible_selected = self
+            .visible_indices
+            .iter()
+            .all(|index| self.selected_ports.contains(index));
+
+        if all_visible_selected {
+            for index in &self.visible_indices {
+                self.selected_ports.remove(index);
+            }
+            self.message = Some(format!(
+                "Visible rows unselected ({} total selected)",
+                self.selected_ports.len()
+            ));
+        } else {
+            for index in &self.visible_indices {
+                self.selected_ports.insert(*index);
+            }
+            self.message = Some(format!(
+                "Visible rows selected ({} total selected)",
+                self.selected_ports.len()
+            ));
+        }
+    }
+
     pub fn request_kill_selected(&mut self) {
         let Some(info) = self.selected_port().cloned() else {
             self.message = Some("No selected row".to_string());

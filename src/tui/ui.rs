@@ -257,7 +257,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         ""
     };
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy{}  {}  {}",
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [v]vis-toggle [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy{}  {}  {}",
         mode_indicator, group_indicator, kill_hint, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
