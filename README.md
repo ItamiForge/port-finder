@@ -67,6 +67,15 @@ Use `--json` on `list`, `find`, and `check` for machine-readable output.
 - `pf find 3000 --json`: object with `in_use` and `entry`
 - `pf check 8080 --json`: object with `available` and `in_use`
 
+### Exit codes
+
+CLI commands use stable exit codes for automation:
+
+- `0`: success (`list`, `scan`, `kill`, `find` found, `check` available)
+- `1`: command/runtime error
+- `2`: `check` found the port in use
+- `3`: `find` did not find an active owner for the port
+
 ## TUI controls
 
 - `q` / `Esc`: quit

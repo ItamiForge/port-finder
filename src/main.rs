@@ -6,17 +6,31 @@ use anyhow::Result;
 use clap::Parser;
 use cli::{Cli, Command};
 use serde_json::json;
+use std::process;
 
-fn main() -> Result<()> {
+const EXIT_OK: i32 = 0;
+const EXIT_ERROR: i32 = 1;
+const EXIT_CHECK_IN_USE: i32 = 2;
+const EXIT_FIND_NOT_FOUND: i32 = 3;
+
+fn main() {
     let cli = Cli::parse();
 
-    match cli.command {
+    let result = match cli.command {
         Some(cmd) => run_command(cmd),
-        None => tui::run(),
+        None => tui::run().map(|_| EXIT_OK),
+    };
+
+    match result {
+        Ok(code) => process::exit(code),
+        Err(err) => {
+            eprintln!("Error: {err}");
+            process::exit(EXIT_ERROR);
+        }
     }
 }
 
-fn run_command(cmd: Command) -> Result<()> {
+fn run_command(cmd: Command) -> Result<i32> {
     match cmd {
         Command::List { all, json } => {
             let ports = port::list_ports(all)?;
@@ -29,6 +43,7 @@ fn run_command(cmd: Command) -> Result<()> {
             } else {
                 port::print_ports(&ports);
             }
+            Ok(EXIT_OK)
         }
         Command::Find { port, json } => {
             if let Some(info) = port::find_port(port)? {
@@ -42,6 +57,7 @@ fn run_command(cmd: Command) -> Result<()> {
                 } else {
                     port::print_ports(&[info]);
                 }
+                Ok(EXIT_OK)
             } else if json {
                 let payload = json!({
                     "port": port,
@@ -49,12 +65,15 @@ fn run_command(cmd: Command) -> Result<()> {
                     "entry": serde_json::Value::Null,
                 });
                 println!("{}", serde_json::to_string_pretty(&payload)?);
+                Ok(EXIT_FIND_NOT_FOUND)
             } else {
                 println!("Port {} is not in use", port);
+                Ok(EXIT_FIND_NOT_FOUND)
             }
         }
         Command::Kill { port, force } => {
             port::kill_port(port, force)?;
+            Ok(EXIT_OK)
         }
         Command::Check { port, json } => {
             let available = port::is_available(port)?;
@@ -70,12 +89,17 @@ fn run_command(cmd: Command) -> Result<()> {
             } else {
                 println!("Port {} is in use", port);
             }
+            if available {
+                Ok(EXIT_OK)
+            } else {
+                Ok(EXIT_CHECK_IN_USE)
+            }
         }
         Command::Scan { range } => {
             port::scan_range(&range)?;
+            Ok(EXIT_OK)
         }
     }
-    Ok(())
 }
 
 fn port_info_json(info: &port::PortInfo) -> serde_json::Value {
