@@ -1,2 +1,83 @@
 # port-finder
-Cross-platform port management CLI with interactive TUI
+
+Cross-platform CLI + TUI for discovering and reclaiming busy ports quickly.
+
+## Why
+
+When local development breaks because a port is already in use, `port-finder` gives you fast answers and one-command cleanup.
+
+## Features
+
+- List active ports with process details
+- Find what owns a specific port
+- Kill process by port
+- Check whether a port is available
+- Scan ranges for available/in-use ports
+- Interactive TUI mode (`pf`)
+- Works on macOS, Linux, and Windows
+
+## Install
+
+### From GitHub
+
+```bash
+cargo install --git https://github.com/ItamiForge/port-finder.git
+```
+
+### From local source
+
+```bash
+cargo install --path .
+```
+
+### Verify
+
+```bash
+pf --version
+```
+
+## Quick usage
+
+```bash
+pf
+pf list
+pf find 3000
+pf kill 3000
+pf check 8080
+pf scan 3000-4000
+```
+
+## Command reference
+
+- `pf`: launch interactive TUI
+- `pf list [--all]`: list active ports (`--all` includes non-listen states)
+- `pf find <port>`: show process details for one port
+- `pf kill <port> [--force]`: terminate process on a port
+- `pf check <port>`: return availability status
+- `pf scan <start-end>`: scan a range like `3000-4000`
+
+## TUI controls
+
+- `q` / `Esc`: quit
+- `r`: refresh
+- `↑` / `↓` or `j` / `k`: navigate
+- `PgUp` / `PgDn`: page navigation
+- `Home` / `End`: jump to first/last row
+- `Enter`: inspect selected process
+- `K`: kill selected process
+- `a`: toggle all/listening view
+- `g`: toggle grouped view
+- `s`: cycle sort column
+- `/`: enter filter mode (type to filter, `Enter` apply, `Esc` clear)
+- `c`: copy selected local address
+
+## Build and quality checks
+
+```bash
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+```
+
+## License
+
+MIT
