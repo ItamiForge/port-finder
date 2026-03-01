@@ -3,6 +3,7 @@ use anyhow::Result;
 use copypasta::{ClipboardContext, ClipboardProvider};
 use ratatui::widgets::TableState;
 use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use sysinfo::{Pid, System};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -31,6 +32,7 @@ pub struct App {
     pub sort_direction: SortDirection,
     pub group_mode: bool,
     pub inspect_mode: bool,
+    pub selected_ports: BTreeSet<usize>,
     clipboard: Option<ClipboardContext>,
 }
 
@@ -58,6 +60,7 @@ impl App {
             sort_direction: SortDirection::Asc,
             group_mode: false,
             inspect_mode: false,
+            selected_ports: BTreeSet::new(),
             clipboard,
         })
     }
@@ -67,6 +70,7 @@ impl App {
         self.sort_ports(&mut ports);
         self.ports = ports;
         self.visible_indices = (0..self.ports.len()).collect();
+        self.selected_ports.clear();
 
         if self.visible_indices.is_empty() {
             self.state.select(None);
@@ -263,9 +267,68 @@ impl App {
         Ok(())
     }
 
-    pub fn selected_port(&self) -> Option<&PortInfo> {
+    pub fn toggle_select_selected(&mut self) {
+        let Some(index) = self.selected_port_index() else {
+            return;
+        };
+
+        if self.selected_ports.contains(&index) {
+            self.selected_ports.remove(&index);
+        } else {
+            self.selected_ports.insert(index);
+        }
+
+        self.message = Some(format!("Selected {} row(s)", self.selected_ports.len()));
+    }
+
+    pub fn clear_selection(&mut self) {
+        self.selected_ports.clear();
+        self.message = Some("Selection cleared".to_string());
+    }
+
+    pub fn kill_selected_batch(&mut self) -> Result<()> {
+        if self.selected_ports.is_empty() {
+            self.message = Some("No selected rows".to_string());
+            return Ok(());
+        }
+
+        let mut pids_to_kill = BTreeSet::new();
+        for index in &self.selected_ports {
+            if let Some(info) = self.ports.get(*index) {
+                if let Some(pid) = info.pid {
+                    pids_to_kill.insert(pid);
+                }
+            }
+        }
+
+        if pids_to_kill.is_empty() {
+            self.message = Some("No killable PID in selected rows".to_string());
+            return Ok(());
+        }
+
+        let mut sys = System::new_all();
+        sys.refresh_all();
+
+        let mut killed = 0usize;
+        for pid in pids_to_kill {
+            if let Some(process) = sys.process(Pid::from_u32(pid)) {
+                process.kill();
+                killed += 1;
+            }
+        }
+
+        self.message = Some(format!("Batch kill complete: {} process(es)", killed));
+        self.refresh()?;
+        Ok(())
+    }
+
+    pub fn selected_port_index(&self) -> Option<usize> {
         let selected = self.state.selected()?;
-        let port_idx = *self.visible_indices.get(selected)?;
+        self.visible_indices.get(selected).copied()
+    }
+
+    pub fn selected_port(&self) -> Option<&PortInfo> {
+        let port_idx = self.selected_port_index()?;
         self.ports.get(port_idx)
     }
 }

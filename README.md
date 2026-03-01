@@ -64,7 +64,10 @@ pf scan 3000-4000
 - `PgUp` / `PgDn`: page navigation
 - `Home` / `End`: jump to first/last row
 - `Enter`: inspect selected process
+- `Space`: toggle row selection
+- `x`: clear selected rows
 - `K`: kill selected process
+- `B`: batch kill selected rows
 - `a`: toggle all/listening view
 - `g`: toggle grouped view
 - `s`: cycle sort column

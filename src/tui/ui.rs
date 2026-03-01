@@ -72,6 +72,11 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
             let representative = process_ports[0];
             let p = representative.1;
             visible_indices.push(representative.0);
+            let selected_marker = if app.selected_ports.contains(&representative.0) {
+                "*"
+            } else {
+                " "
+            };
 
             let ports_str = process_ports
                 .iter()
@@ -91,6 +96,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
             };
 
             group_rows.push(Row::new(vec![
+                Cell::from(selected_marker),
                 Cell::from(port_display).style(Style::default().fg(Color::Cyan)),
                 Cell::from(p.protocol.as_str()),
                 Cell::from(p.state.as_str()).style(state_style),
@@ -106,11 +112,17 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 
         for (index, p) in no_pid {
             visible_indices.push(index);
+            let selected_marker = if app.selected_ports.contains(&index) {
+                "*"
+            } else {
+                " "
+            };
             let state_style = match p.state.as_str() {
                 "Listen" => Style::default().fg(Color::Green),
                 _ => Style::default(),
             };
             group_rows.push(Row::new(vec![
+                Cell::from(selected_marker),
                 Cell::from(p.port.to_string()).style(Style::default().fg(Color::Cyan)),
                 Cell::from(p.protocol.as_str()),
                 Cell::from(p.state.as_str()).style(state_style),
@@ -130,6 +142,11 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
             .iter()
             .map(|(index, p)| {
                 visible_indices.push(*index);
+                let selected_marker = if app.selected_ports.contains(index) {
+                    "*"
+                } else {
+                    " "
+                };
                 let state_style = match p.state.as_str() {
                     "Listen" => Style::default().fg(Color::Green),
                     "Established" => Style::default().fg(Color::Cyan),
@@ -139,6 +156,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
                 };
 
                 Row::new(vec![
+                    Cell::from(selected_marker),
                     Cell::from(p.port.to_string()).style(Style::default().fg(Color::Cyan)),
                     Cell::from(p.protocol.as_str()),
                     Cell::from(p.state.as_str()).style(state_style),
@@ -167,9 +185,10 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 
     let header_text = format!(
-        " Port Finder  •  Visible: {}  •  Total: {}  •  Mode: {}  •  Sort: {:?} ({:?}) ",
+        " Port Finder  •  Visible: {}  •  Total: {}  •  Selected: {}  •  Mode: {}  •  Sort: {:?} ({:?}) ",
         rows.len(),
         app.ports.len(),
+        app.selected_ports.len(),
         if app.show_all { "ALL" } else { "LISTEN" },
         app.sort_column,
         app.sort_direction
@@ -180,7 +199,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     frame.render_widget(header, chunks[0]);
 
     let header_cells = [
-        "PORT(S)", "PROTO", "STATE", "PID", "PROCESS", "LOCAL", "TIME", "CPU", "MEM", "USER",
+        "SEL", "PORT(S)", "PROTO", "STATE", "PID", "PROCESS", "LOCAL", "TIME", "CPU", "MEM", "USER",
     ];
     let header = Row::new(header_cells).style(
         Style::default()
@@ -192,6 +211,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         Table::new(
             rows,
             [
+                Constraint::Length(4),
                 Constraint::Length(8),
                 Constraint::Length(6),
                 Constraint::Length(12),
@@ -222,7 +242,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     };
     let msg = app.message.as_deref().unwrap_or("");
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Enter]inspect [c]opy [K]ill  {}  {}",
+        " [q]uit [r]efresh [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy  {}  {}",
         mode_indicator, group_indicator, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
