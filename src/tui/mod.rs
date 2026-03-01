@@ -50,7 +50,12 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
-                    if app.inspect_mode {
+                    if app.help_mode {
+                        match key.code {
+                            KeyCode::Char('?') | KeyCode::Esc => app.toggle_help(),
+                            _ => {}
+                        }
+                    } else if app.inspect_mode {
                         match key.code {
                             KeyCode::Esc | KeyCode::Enter => app.toggle_inspect(),
                             _ => {}
@@ -109,6 +114,7 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('g') => app.toggle_group(),
                             KeyCode::Enter => app.toggle_inspect(),
                             KeyCode::Char('c') => app.copy_selected(),
+                            KeyCode::Char('?') => app.toggle_help(),
                             _ => {}
                         }
                     }

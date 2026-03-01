@@ -84,6 +84,7 @@ pf scan 3000-4000
 - `w`: cycle state filter (All/Listen/Established)
 - `/`: enter filter mode (type to filter, `Enter` apply, `Esc` clear)
 - `z`: reset text/protocol/state filters
+- `?`: open keyboard help overlay
 - `c`: copy selected local address
 
 ## Build and quality checks

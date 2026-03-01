@@ -60,6 +60,7 @@ pub struct App {
     pub state_filter: StateFilter,
     pub group_mode: bool,
     pub inspect_mode: bool,
+    pub help_mode: bool,
     pub auto_refresh: bool,
     pub auto_refresh_interval_ms: u64,
     pub selected_ports: BTreeSet<usize>,
@@ -93,6 +94,7 @@ impl App {
             state_filter: StateFilter::All,
             group_mode: false,
             inspect_mode: false,
+            help_mode: false,
             auto_refresh: false,
             auto_refresh_interval_ms: 1_000,
             selected_ports: BTreeSet::new(),
@@ -289,6 +291,10 @@ impl App {
 
     pub fn toggle_inspect(&mut self) {
         self.inspect_mode = !self.inspect_mode;
+    }
+
+    pub fn toggle_help(&mut self) {
+        self.help_mode = !self.help_mode;
     }
 
     pub fn copy_selected(&mut self) {

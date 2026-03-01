@@ -257,7 +257,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         ""
     };
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [z]reset-filters [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [v]vis-toggle [i]invert [u]pid-toggle [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy{}  {}  {}",
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [z]reset-filters [j/k,↑/↓]move [Pg]page [Home/End] [Space]select [v]vis-toggle [i]invert [u]pid-toggle [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy [?]help{}  {}  {}",
         mode_indicator, group_indicator, kill_hint, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
@@ -271,6 +271,10 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 
     if app.has_pending_kill() {
         render_confirm_popup(frame, app);
+    }
+
+    if app.help_mode {
+        render_help_popup(frame);
     }
 }
 
@@ -379,6 +383,37 @@ fn render_confirm_popup(frame: &mut Frame, app: &App) {
 
     let paragraph = Paragraph::new(text)
         .block(Block::default().borders(Borders::ALL).title(" Confirm "))
+        .wrap(Wrap { trim: true });
+
+    frame.render_widget(Clear, area);
+    frame.render_widget(paragraph, area);
+}
+
+fn render_help_popup(frame: &mut Frame) {
+    let area = centered_rect(70, 70, frame.area());
+    let text = vec![
+        Line::from(Span::styled(
+            "TUI Keymap",
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from("Navigation: j/k or ↑/↓, PgUp/PgDn, Home/End"),
+        Line::from("Views: a(all/listen), g(group), Enter(inspect), /(filter), z(reset filters)"),
+        Line::from("Sort/Filters: s(sort), d(direction), p(protocol), w(state)"),
+        Line::from("Selection: Space(toggle row), v(toggle visible), i(invert visible), u(toggle PID group), x(clear)"),
+        Line::from("Process control: K(stage kill), B(stage batch kill), y/Enter(confirm), n/Esc(cancel)"),
+        Line::from("Misc: r(refresh), t(auto refresh), +/- (interval), c(copy local address), q(quit)"),
+        Line::from(""),
+        Line::from(Span::styled(
+            "Press ? or Esc to close",
+            Style::default().fg(Color::DarkGray),
+        )),
+    ];
+
+    let paragraph = Paragraph::new(text)
+        .block(Block::default().borders(Borders::ALL).title(" Help "))
         .wrap(Wrap { trim: true });
 
     frame.render_widget(Clear, area);
