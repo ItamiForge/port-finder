@@ -87,6 +87,7 @@ pf scan 3000-4000
 - `z`: reset text/protocol/state filters
 - `?`: open keyboard help overlay
 - `c`: copy selected local address
+- `m`: clear status message
 
 ## Build and quality checks
 

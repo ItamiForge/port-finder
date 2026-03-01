@@ -257,7 +257,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         ""
     };
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [z]reset-filters [j/k,↑/↓]move [n/N]sel-jump [Pg]page [Home/End] [Space]select [v]vis-toggle [i]invert [u]pid-toggle [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy [?]help{}  {}  {}",
+        " [q]uit [r]efresh [t]auto [+/−]interval [a]ll({}) [g]roup({}) [s]ort [d]dir [p]proto [w]state [/]filter [z]reset-filters [j/k,↑/↓]move [n/N]sel-jump [Pg]page [Home/End] [Space]select [v]vis-toggle [i]invert [u]pid-toggle [x]clear [K]kill [B]batch-kill [Enter]inspect [c]opy [m]clear-msg [?]help{}  {}  {}",
         mode_indicator, group_indicator, kill_hint, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
@@ -404,7 +404,7 @@ fn render_help_popup(frame: &mut Frame) {
         Line::from("Sort/Filters: s(sort), d(direction), p(protocol), w(state)"),
         Line::from("Selection: Space(toggle row), v(toggle visible), i(invert visible), u(toggle PID group), x(clear)"),
         Line::from("Process control: K(stage kill), B(stage batch kill), y/Enter(confirm), n/Esc(cancel)"),
-        Line::from("Misc: r(refresh), t(auto refresh), +/- (interval), c(copy local address), q(quit)"),
+        Line::from("Misc: r(refresh), t(auto refresh), +/- (interval), c(copy local address), m(clear message), q(quit)"),
         Line::from(""),
         Line::from(Span::styled(
             "Press ? or Esc to close",

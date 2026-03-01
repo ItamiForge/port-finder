@@ -297,6 +297,10 @@ impl App {
         self.help_mode = !self.help_mode;
     }
 
+    pub fn clear_message(&mut self) {
+        self.message = None;
+    }
+
     pub fn copy_selected(&mut self) {
         if let Some(info) = self.selected_port() {
             let text = info.local_addr.to_string();

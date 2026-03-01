@@ -116,6 +116,7 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('g') => app.toggle_group(),
                             KeyCode::Enter => app.toggle_inspect(),
                             KeyCode::Char('c') => app.copy_selected(),
+                            KeyCode::Char('m') => app.clear_message(),
                             KeyCode::Char('?') => app.toggle_help(),
                             _ => {}
                         }
