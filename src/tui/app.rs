@@ -454,6 +454,54 @@ impl App {
         }
     }
 
+    pub fn toggle_select_same_pid(&mut self) {
+        let Some(selected) = self.selected_port() else {
+            self.message = Some("No selected row".to_string());
+            return;
+        };
+
+        let Some(target_pid) = selected.pid else {
+            self.message = Some("Selected row has no PID".to_string());
+            return;
+        };
+
+        let matching_indices: Vec<usize> = self
+            .ports
+            .iter()
+            .enumerate()
+            .filter_map(|(index, port)| (port.pid == Some(target_pid)).then_some(index))
+            .collect();
+
+        if matching_indices.is_empty() {
+            self.message = Some("No rows with matching PID".to_string());
+            return;
+        }
+
+        let all_selected = matching_indices
+            .iter()
+            .all(|index| self.selected_ports.contains(index));
+
+        if all_selected {
+            for index in matching_indices {
+                self.selected_ports.remove(&index);
+            }
+            self.message = Some(format!(
+                "Unselected rows for PID {} ({} total selected)",
+                target_pid,
+                self.selected_ports.len()
+            ));
+        } else {
+            for index in matching_indices {
+                self.selected_ports.insert(index);
+            }
+            self.message = Some(format!(
+                "Selected rows for PID {} ({} total selected)",
+                target_pid,
+                self.selected_ports.len()
+            ));
+        }
+    }
+
     pub fn request_kill_selected(&mut self) {
         let Some(info) = self.selected_port().cloned() else {
             self.message = Some("No selected row".to_string());
