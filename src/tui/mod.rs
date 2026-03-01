@@ -71,6 +71,7 @@ fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
                             KeyCode::Char('a') => app.toggle_all(),
                             KeyCode::Char('/') => app.begin_filter(),
                             KeyCode::Char('s') => app.cycle_sort(),
+                            KeyCode::Char('d') => app.toggle_sort_direction(),
                             KeyCode::Char('g') => app.toggle_group(),
                             KeyCode::Enter => app.toggle_inspect(),
                             KeyCode::Char('c') => app.copy_selected(),

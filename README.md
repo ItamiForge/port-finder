@@ -68,6 +68,7 @@ pf scan 3000-4000
 - `a`: toggle all/listening view
 - `g`: toggle grouped view
 - `s`: cycle sort column
+- `d`: toggle sort direction
 - `/`: enter filter mode (type to filter, `Enter` apply, `Esc` clear)
 - `c`: copy selected local address
 

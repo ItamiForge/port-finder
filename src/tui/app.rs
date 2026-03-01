@@ -13,6 +13,12 @@ pub enum SortColumn {
     Cpu,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum SortDirection {
+    Asc,
+    Desc,
+}
+
 pub struct App {
     pub ports: Vec<PortInfo>,
     pub visible_indices: Vec<usize>,
@@ -22,6 +28,7 @@ pub struct App {
     pub filter_text: String,
     pub message: Option<String>,
     pub sort_column: SortColumn,
+    pub sort_direction: SortDirection,
     pub group_mode: bool,
     pub inspect_mode: bool,
     clipboard: Option<ClipboardContext>,
@@ -48,6 +55,7 @@ impl App {
             filter_text: String::new(),
             message: None,
             sort_column: SortColumn::Port,
+            sort_direction: SortDirection::Asc,
             group_mode: false,
             inspect_mode: false,
             clipboard,
@@ -74,14 +82,18 @@ impl App {
 
     fn sort_ports(&self, ports: &mut [PortInfo]) {
         match self.sort_column {
-            SortColumn::Port => ports.sort_by_key(|p| p.port),
-            SortColumn::Pid => ports.sort_by_key(|p| p.pid.unwrap_or(0)),
-            SortColumn::Memory => ports.sort_by(|a, b| b.memory.cmp(&a.memory)),
+            SortColumn::Port => ports.sort_by(|a, b| a.port.cmp(&b.port)),
+            SortColumn::Pid => ports.sort_by(|a, b| a.pid.unwrap_or(0).cmp(&b.pid.unwrap_or(0))),
+            SortColumn::Memory => ports.sort_by(|a, b| a.memory.cmp(&b.memory)),
             SortColumn::Cpu => ports.sort_by(|a, b| {
-                b.cpu_usage
-                    .partial_cmp(&a.cpu_usage)
+                a.cpu_usage
+                    .partial_cmp(&b.cpu_usage)
                     .unwrap_or(Ordering::Equal)
             }),
+        }
+
+        if self.sort_direction == SortDirection::Desc {
+            ports.reverse();
         }
     }
 
@@ -94,6 +106,15 @@ impl App {
         };
         let _ = self.refresh();
         self.message = Some(format!("Sorted by {:?}", self.sort_column));
+    }
+
+    pub fn toggle_sort_direction(&mut self) {
+        self.sort_direction = match self.sort_direction {
+            SortDirection::Asc => SortDirection::Desc,
+            SortDirection::Desc => SortDirection::Asc,
+        };
+        let _ = self.refresh();
+        self.message = Some(format!("Sort direction: {:?}", self.sort_direction));
     }
 
     pub fn begin_filter(&mut self) {

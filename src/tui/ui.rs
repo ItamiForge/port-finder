@@ -167,11 +167,12 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     }
 
     let header_text = format!(
-        " Port Finder  •  Visible: {}  •  Total: {}  •  Mode: {}  •  Sort: {:?} ",
+        " Port Finder  •  Visible: {}  •  Total: {}  •  Mode: {}  •  Sort: {:?} ({:?}) ",
         rows.len(),
         app.ports.len(),
         if app.show_all { "ALL" } else { "LISTEN" },
-        app.sort_column
+        app.sort_column,
+        app.sort_direction
     );
     let header = Paragraph::new(header_text)
         .style(Style::default().fg(Color::Cyan))
@@ -221,7 +222,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     };
     let msg = app.message.as_deref().unwrap_or("");
     let footer = Paragraph::new(format!(
-        " [q]uit [r]efresh [a]ll({}) [g]roup({}) [s]ort [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Enter]inspect [c]opy [K]ill  {}  {}",
+        " [q]uit [r]efresh [a]ll({}) [g]roup({}) [s]ort [d]dir [/]filter [j/k,↑/↓]move [Pg]page [Home/End] [Enter]inspect [c]opy [K]ill  {}  {}",
         mode_indicator, group_indicator, filter_indicator, msg
     ))
     .style(Style::default().fg(Color::DarkGray))
