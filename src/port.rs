@@ -43,7 +43,6 @@ impl PortInfo {
     }
 
     pub fn smart_label(&self) -> String {
-        // Known ports
         match self.port {
             22 => return "SSH".to_string(),
             80 | 8080 => return "HTTP".to_string(),
@@ -56,7 +55,6 @@ impl PortInfo {
             _ => {}
         }
 
-        // Known process names
         let name = self.process_name.to_lowercase();
         if name.contains("node") {
             return "Node".to_string();

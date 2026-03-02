@@ -1,10 +1,6 @@
 # port-finder
 
-Cross-platform CLI + TUI for discovering and reclaiming busy ports quickly.
-
-## Why
-
-When local development breaks because a port is already in use, `port-finder` gives you fast answers and one-command cleanup.
+Cross-platform CLI and TUI for finding and reclaiming busy ports.
 
 ## Features
 
@@ -12,7 +8,7 @@ When local development breaks because a port is already in use, `port-finder` gi
 - Find what owns a specific port
 - Kill process by port
 - Check whether a port is available
-- Scan ranges for available/in-use ports
+- Scan ranges for available and in-use ports
 - Interactive TUI mode (`pf`)
 - Selection persistence across refresh and auto-refresh
 - Clear kill feedback (killed, missing, permission/protected failures)
