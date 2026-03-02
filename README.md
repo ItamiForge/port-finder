@@ -16,6 +16,12 @@ Cross-platform CLI and TUI for finding and reclaiming busy ports.
 
 ## Install
 
+### From crates.io
+
+```bash
+cargo install port-finder
+```
+
 ### From GitHub
 
 ```bash
