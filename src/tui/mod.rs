@@ -33,7 +33,10 @@ pub fn run() -> Result<()> {
     res
 }
 
-fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()> {
+fn run_loop<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<()>
+where
+    B::Error: std::error::Error + Send + Sync + 'static,
+{
     const PAGE_STEP: usize = 10;
     let mut last_refresh = std::time::Instant::now();
 
