@@ -1,0 +1,14 @@
+catalog: true
+slug: port-finder
+title: Port Finder
+summary: Cross-platform CLI and TUI for finding and reclaiming busy ports.
+status: active
+category: cli
+featured: true
+visibility: public
+tags:
+  - rust
+  - cli
+  - tui
+  - networking
+install: cargo install --git https://github.com/ItamiForge/port-finder.git
